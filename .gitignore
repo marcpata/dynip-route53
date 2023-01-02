@@ -1,0 +1,29 @@
+# Archivos generados por Python
+*.pyc
+*.pyo
+
+# Archivos generados por pip
+*.egg-info
+dist
+build
+
+# Archivos generados por PyInstaller
+*.spec
+
+# Archivos generados por Python en el directorio de trabajo
+__pycache__/
+*.pytest_cache/
+
+# Archivos generados por Jupyter
+.ipynb_checkpoints/
+
+# Archivos generados por IDEs y editores
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Carpetas y archivos que no deben ser incluidos en el repositorio
+venv/
+.env
+env/
+.venv/
