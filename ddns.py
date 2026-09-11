@@ -8,17 +8,15 @@ from dotenv import load_dotenv
 # Cargar variables de entorno
 load_dotenv()
 
-aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-hosted_zone = os.environ.get("HOSTED_ZONE")
+# Credenciales y configuración con prefijo DYNR53_
+aws_access_key_id = os.environ.get("DYNR53_AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
+aws_secret_access_key = os.environ.get("DYNR53_AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
+hosted_zone = os.environ.get("DYNR53_HOSTED_ZONE") or os.environ.get("HOSTED_ZONE")
 
 # Variables de configuración personalizables mediante entorno con valores por defecto seguros
-# INTERVAL_SECONDS: Intervalo de tiempo entre verificaciones (por defecto 300 segundos / 5 minutos)
-INTERVAL_SECONDS = int(os.environ.get("INTERVAL_SECONDS", "300"))
-# MAX_RETRY_DELAY: Tiempo máximo de espera en backoff exponencial durante fallos de red (por defecto 300 segundos)
-MAX_RETRY_DELAY = int(os.environ.get("MAX_RETRY_DELAY", "300"))
-# INITIAL_RETRY_DELAY: Tiempo inicial de espera en backoff exponencial (por defecto 5 segundos)
-INITIAL_RETRY_DELAY = float(os.environ.get("INITIAL_RETRY_DELAY", "5.0"))
+INTERVAL_SECONDS = int(os.environ.get("DYNR53_INTERVAL_SECONDS", "300"))
+MAX_RETRY_DELAY = int(os.environ.get("DYNR53_MAX_RETRY_DELAY", "300"))
+INITIAL_RETRY_DELAY = float(os.environ.get("DYNR53_INITIAL_RETRY_DELAY", "5.0"))
 
 def get_current_ip():
     """Obtiene la IP pública actual utilizando múltiples servicios de respaldo y reintentos con backoff exponencial."""
@@ -35,14 +33,12 @@ def get_current_ip():
                 response = requests.get(service, timeout=10)
                 if response.status_code == 200:
                     data = response.json()
-                    # Soporte para diferentes formatos de respuesta según el servicio
                     ip = data.get("ip") or data.get("query")
                     if ip:
                         return ip.strip()
             except Exception as e:
                 print(f"[Advertencia] Fallo al consultar {service}: {e}")
                 
-        # Si fallan todos los servicios, aplicamos ajuste automático / backoff exponencial ante pérdida de conectividad
         print(f"[Conectividad] No se pudo obtener la IP pública. Reintentando en {delay:.1f} segundos...")
         time.sleep(delay)
         delay = min(delay * 2, MAX_RETRY_DELAY)
@@ -70,7 +66,6 @@ def load_domains(filename):
 def main():
     print(f"Iniciando servicio DDNS para Route53. Intervalo: {INTERVAL_SECONDS}s")
     
-    # Inicializar cliente de Route 53
     route53 = boto3.client(
         "route53",
         aws_access_key_id=aws_access_key_id,
