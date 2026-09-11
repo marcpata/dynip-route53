@@ -1,38 +1,25 @@
-# dynip-route53
+# Configuración de Dynamic DNS Route53
 
-Script de Python para actualizar dinámicamente registros DNS A en AWS Route 53 utilizando la IP pública actual, empaquetado con Docker.
+Este script actualiza automáticamente registros tipo A en Amazon Route53 con la IP pública actual de tu host.
 
-## Características
+## Variables de Entorno
 
-- Obtiene la IP pública actual a través de `api.ipify.org`.
-- Lee una lista de dominios y subdominios desde el archivo `domains.list`.
-- Actualiza automáticamente los registros en Route 53 mediante la API de AWS (`boto3`).
-- Se ejecuta continuamente cada 30 minutos o mediante Docker/Docker Compose.
+El script utiliza variables de entorno con el prefijo `DYNR53_` para evitar colisiones. (También admite retrocompatibilidad con las variables estándar sin prefijo).
 
-## Requisitos
-
-- Python 3.8+
-- Credenciales de AWS con permisos para Route 53 (`AmazonRoute53FullAccess` o similar).
-
-## Configuración
-
-1. Crear un archivo `.env` o configurar las siguientes variables de entorno:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-   - `HOSTED_ZONE` (ej. `example.com`)
-
-2. Editar el archivo `domains.list` con los subdominios que desea actualizar (uno por línea).
+| Variable | Descripción | Valor por defecto / Ejemplo |
+|---|---|---|
+| `DYNR53_AWS_ACCESS_KEY_ID` | Access Key ID de AWS | `AKIAIOSFODNN7EXAMPLE` |
+| `DYNR53_AWS_SECRET_ACCESS_KEY` | Secret Access Key de AWS | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `DYNR53_HOSTED_ZONE` | Nombre de la zona alojada en Route53 | `example.com` |
+| `DYNR53_INTERVAL_SECONDS` | Intervalo de tiempo entre verificaciones | `300` |
+| `DYNR53_INITIAL_RETRY_DELAY` | Retardo inicial ante pérdida de conectividad | `5.0` |
+| `DYNR53_MAX_RETRY_DELAY` | Retardo máximo en reintentos con backoff | `300` |
 
 ## Uso
 
-### Local
-```bash
-pip install -r requirements.txt
-python ddns.py
-```
-
-### Con Docker Compose
-```bash
-docker-compose up --build
-```
-
+1. Configura tus credenciales y dominios en `domains.list`.
+2. Define las variables de entorno o crea un archivo `.env`.
+3. Ejecuta el script:
+   ```bash
+   python ddns.py
+   ```
